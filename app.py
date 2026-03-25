@@ -45,7 +45,7 @@ def _default_happ_config_tool_path():
 
 
 APP_NAME = "BroNode"
-APP_VERSION = "1.0.1"
+APP_VERSION = "1.0.2"
 # Visual system: deep void + phosphor readout (lightweight, no literal theme labels in UI)
 UI_BG = "#030a07"
 UI_SURFACE = "#0c1812"

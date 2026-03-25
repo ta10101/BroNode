@@ -15,7 +15,7 @@ Release roadmap (**steps 1–4**): see [PACKAGING.md](PACKAGING.md).
 
 ## Friendlier install (not a developer)
 
-- **Windows:** run **`BroNodeSetup.msi`**. You get a normal installer with **screens that explain each step**, a **folder you can change** (the default is fine), and a **progress bar** while files copy. After install, open BroNode from the Start menu — a **short welcome window** appears once and tells you that **Docker** is required and what **Start Here** does.
+- **Windows:** run **`BroNodeSetup.msi`** or the release **`BroNode.exe`**. The GUI runs Docker in the **background without flashing console windows** during normal use; **Open shell** and **Follow logs in terminal** still open PowerShell on purpose. With the MSI you get **screens that explain each step**, a **folder you can change**, and a **progress bar** while files copy. After install, open BroNode from the Start menu — a **short welcome window** appears once (Docker + **Start Here**).
 - **macOS:** copy **`BroNode.app`** to **Applications** and open it — the same **one-time welcome** appears. You may need to allow the app in **Privacy & Security** the first time (unsigned builds). For downloads outside the App Store, Apple prefers **signed / notarized** apps (see [PACKAGING.md](PACKAGING.md)).
 - **Linux:** extract the **`.tar.gz`**, open a terminal **in that folder**, run **`./install.sh`**. The script **prints each step** (copy files, menu shortcut, etc.). Docker is still something you install separately from your distro.
 
