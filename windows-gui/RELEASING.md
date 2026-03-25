@@ -6,8 +6,9 @@ GitHub Actions builds **Windows**, **Linux**, and **macOS** artifacts when you p
 
 Releases are created on **whatever GitHub repository receives the tag** (your `git push origin <tag>` target).
 
-- For this upstream repo, users download from **[github.com/Holo-Host/edgenode/releases](https://github.com/Holo-Host/edgenode/releases)**. Look for release names like **BroNode GUI `bronode/v…`** (or filter the list by the `bronode/` tag prefix).
-- If you push tags to a **fork**, the release is created on the fork’s Releases page instead — not on `Holo-Host/edgenode` until those commits/tags exist there.
+- **This fork (`ta10101/BroNode`):** **[github.com/ta10101/BroNode/releases](https://github.com/ta10101/BroNode/releases)** — look for **BroNode GUI `bronode/v…`**.
+- **Upstream after merge:** **[github.com/Holo-Host/edgenode/releases](https://github.com/Holo-Host/edgenode/releases)** (same tag pattern).
+- Tags pushed to a **fork** create the release on that fork’s Releases page until commits exist on `Holo-Host/edgenode`.
 
 **Repo settings (maintainers):** *Settings → Actions → General → Workflow permissions* should allow **Read and write** for `GITHUB_TOKEN` (needed to create the release and upload assets). The workflow sets `permissions: contents: write`.
 

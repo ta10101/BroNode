@@ -4,7 +4,7 @@
 
 Cross-platform desktop dashboard for operating a Holo **Edge Node** container locally under the **BroNode** name (Windows, macOS, Linux).
 
-**Downloads (pre-built):** [Holo-Host/edgenode — Releases](https://github.com/Holo-Host/edgenode/releases) → open a **BroNode GUI `bronode/v…`** release for `.exe`, Linux `.tar.gz`, and macOS `.zip`.
+**Downloads (pre-built):** [github.com/ta10101/BroNode/releases](https://github.com/ta10101/BroNode/releases) → open **BroNode GUI `bronode/v…`** for `.exe`, Linux `.tar.gz`, and macOS `.zip` (same layout when published from [Holo-Host/edgenode](https://github.com/Holo-Host/edgenode) after merge).
 
 **Publishing:** push tag `bronode/v*` (see [RELEASING.md](RELEASING.md)); CI builds and attaches assets to that GitHub Release.
 
