@@ -102,6 +102,14 @@ APP_CATALOG = [
 ]
 
 
+def _subprocess_no_console_kwargs():
+    """Windows: hide console for child processes so the frozen GUI does not flash cmd windows."""
+    if sys.platform != "win32":
+        return {}
+    flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+    return {"creationflags": flags} if flags else {}
+
+
 def run_command(command, timeout=20):
     try:
         result = subprocess.run(
@@ -111,6 +119,7 @@ def run_command(command, timeout=20):
             shell=False,
             timeout=timeout,
             check=False,
+            **_subprocess_no_console_kwargs(),
         )
         return result.returncode, result.stdout.strip(), result.stderr.strip()
     except FileNotFoundError:
@@ -2942,6 +2951,7 @@ class EdgeNodeGui:
                     stdout=subprocess.PIPE,
                     stderr=subprocess.STDOUT,
                     text=True,
+                    **_subprocess_no_console_kwargs(),
                 )
                 last_line = "Downloading layers..."
                 for line in proc.stdout:
@@ -3001,9 +3011,18 @@ class EdgeNodeGui:
     def _open_docker_application(self):
         if sys.platform == "win32":
             subprocess.Popen(
-                ["powershell", "-NoExit", "-Command", "Start-Process 'Docker Desktop'"],
+                [
+                    "powershell",
+                    "-NoProfile",
+                    "-NonInteractive",
+                    "-WindowStyle",
+                    "Hidden",
+                    "-Command",
+                    "Start-Process 'Docker Desktop'",
+                ],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
+                **_subprocess_no_console_kwargs(),
             )
             return
         if sys.platform == "darwin":
