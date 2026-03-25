@@ -1,4 +1,6 @@
 # Build BroNode desktop GUI artifacts on tag bronode/v* and publish a GitHub Release.
+# Use current action majors where possible (Node 24–ready); see GitHub Node 20 deprecation:
+# https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
 name: bronode-gui-release
 
 on:
@@ -18,9 +20,9 @@ jobs:
   build-windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
@@ -32,7 +34,7 @@ jobs:
       - name: Build BroNode.exe
         run: python -m PyInstaller --noconfirm BroNode.spec
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: bronode-windows-exe
           path: dist/BroNode.exe
@@ -40,9 +42,9 @@ jobs:
   build-linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
@@ -57,7 +59,7 @@ jobs:
           python -m pip install -r requirements-build.txt
           bash packaging/package_linux_tarball.sh
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: bronode-linux-tarball
           path: dist/bro-node-linux-x64-*.tar.gz
@@ -65,9 +67,9 @@ jobs:
   build-macos:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
@@ -81,7 +83,7 @@ jobs:
           python3 -m PyInstaller --noconfirm BroNode-macos.spec
           bash packaging/package_macos_zip.sh
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: bronode-macos-zip
           path: dist/bro-node-macos-*.zip
@@ -91,19 +93,19 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref_type == 'tag'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: bronode-windows-exe
           path: release-assets
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: bronode-linux-tarball
           path: release-assets
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: bronode-macos-zip
           path: release-assets
@@ -124,7 +126,7 @@ jobs:
           if ((${#linux[@]} != 1)); then echo "Expected exactly one Linux tarball, found ${#linux[@]}: ${linux[*]}"; exit 1; fi
           if ((${#mac[@]} != 1)); then echo "Expected exactly one macOS zip, found ${#mac[@]}: ${mac[*]}"; exit 1; fi
 
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v2.6.1
         with:
           tag_name: ${{ github.ref_name }}
           name: BroNode ${{ github.ref_name }}
