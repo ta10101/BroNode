@@ -39,6 +39,7 @@ A [specialized OS builder](holos/README.md) for creating custom ISO images using
 ### Tools
 
 - A CLI utility for creating and validating [hApp config files](tools/happ_config_file/README.md).
+- A cross-platform desktop app (**BroNode**) for operating Edge Node containers: [windows-gui README](windows-gui/README.md), [install / uninstall](windows-gui/docs/INSTALL_AND_UNINSTALL.md), [how to release](windows-gui/RELEASING.md). **Pre-built BroNode binaries:** [Releases](https://github.com/Holo-Host/edgenode/releases) (tags `bronode/v…`).
 
 
 ## Quick Start

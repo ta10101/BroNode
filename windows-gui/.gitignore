@@ -1,0 +1,7 @@
+dist/
+build/
+*.spec.bak
+__pycache__/
+*.py[cod]
+packaging/_stage/
+packaging/wix/build/

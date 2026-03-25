@@ -1,0 +1,4 @@
+# BroNode runtime (optional extras)
+# Tkinter: stdlib on most Python builds; Linux may need: sudo apt install python3-tk
+# cairosvg needs system Cairo on Linux, e.g.: sudo apt install libcairo2
+cairosvg>=2.7.0

@@ -1,0 +1,21 @@
+{
+  "app": {
+    "name": "elemental_chat",
+    "version": "0.3.0",
+    "happUrl": "https://github.com/holochain/elemental-chat/releases/download/v0.3.0/elemental-chat.happ",
+    "modifiers": {
+      "networkSeed": "",
+      "properties": {}
+    }
+  },
+  "env": {
+    "holochain": {
+      "version": "",
+      "flags": [
+        ""
+      ],
+      "bootstrapUrl": "",
+      "relayUrl": ""
+    }
+  }
+}

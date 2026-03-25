@@ -1,0 +1,155 @@
+# Build BroNode desktop GUI artifacts on tag bronode/v* and publish a GitHub Release.
+name: bronode-gui-release
+
+on:
+  push:
+    tags:
+      - "bronode/v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bronode-gui-release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: windows-gui
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps + PyInstaller
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-build.txt
+
+      - name: Build BroNode.exe
+        run: python -m PyInstaller --noconfirm BroNode.spec
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bronode-windows-exe
+          path: windows-gui/dist/BroNode.exe
+
+  build-linux:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: windows-gui
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: System packages (tkinter + cairo for cairosvg)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-tk libcairo2
+
+      - name: Install deps + build tarball (includes PyInstaller)
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-build.txt
+          bash packaging/package_linux_tarball.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bronode-linux-tarball
+          path: windows-gui/dist/bro-node-linux-x64-*.tar.gz
+
+  build-macos:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: windows-gui
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps + PyInstaller
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements-build.txt
+
+      - name: Build BroNode.app + zip
+        run: |
+          python3 -m PyInstaller --noconfirm BroNode-macos.spec
+          bash packaging/package_macos_zip.sh
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bronode-macos-zip
+          path: windows-gui/dist/bro-node-macos-*.zip
+
+  release:
+    needs: [build-windows, build-linux, build-macos]
+    runs-on: ubuntu-latest
+    if: github.ref_type == 'tag'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: bronode-windows-exe
+          path: release-assets
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: bronode-linux-tarball
+          path: release-assets
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: bronode-macos-zip
+          path: release-assets
+
+      - name: Copy install doc into release bundle
+        run: cp windows-gui/docs/INSTALL_AND_UNINSTALL.md release-assets/
+
+      - name: Verify release assets (fail before empty publish)
+        shell: bash
+        run: |
+          set -euo pipefail
+          ls -la release-assets
+          test -f release-assets/BroNode.exe
+          test -f release-assets/INSTALL_AND_UNINSTALL.md
+          shopt -s nullglob
+          linux=(release-assets/bro-node-linux-x64-*.tar.gz)
+          mac=(release-assets/bro-node-macos-*.zip)
+          if ((${#linux[@]} != 1)); then echo "Expected exactly one Linux tarball, found ${#linux[@]}: ${linux[*]}"; exit 1; fi
+          if ((${#mac[@]} != 1)); then echo "Expected exactly one macOS zip, found ${#mac[@]}: ${mac[*]}"; exit 1; fi
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: BroNode GUI ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          # BroNode shares this repo with HolOS / other releases; do not steal the repo "Latest" badge.
+          make_latest: "false"
+          fail_on_unmatched_files: true
+          body: |
+            BroNode — desktop helper for the [Holo Edge Node](https://github.com/Holo-Host/edgenode) (`ghcr.io/holo-host/edgenode`).
+
+            **Requires Docker** (Desktop or Engine). See `INSTALL_AND_UNINSTALL.md` in the assets below.
+
+            | File | Platform |
+            |------|----------|
+            | `BroNode.exe` | Windows x64 |
+            | `bro-node-linux-x64-*.tar.gz` | Linux x64 |
+            | `bro-node-macos-*.zip` | macOS (BroNode.app) |
+          files: release-assets/*

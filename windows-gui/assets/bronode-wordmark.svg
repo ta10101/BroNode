@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="140" viewBox="0 0 520 140" role="img" aria-label="BroNode">
+  <defs>
+    <linearGradient id="bn-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#00e676" stop-opacity="0.2"/>
+    </linearGradient>
+    <filter id="bn-soft" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="0.6" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="520" height="140" fill="#030a07"/>
+  <rect x="24" y="24" width="472" height="92" rx="6" fill="url(#bn-glow)" stroke="#2d5240" stroke-width="1"/>
+  <text x="260" y="88" text-anchor="middle" font-family="Segoe UI Black, Arial Black, Helvetica Neue, sans-serif" font-size="52" font-weight="800" fill="#00e676" filter="url(#bn-soft)" letter-spacing="-1">BroNode</text>
+  <text x="260" y="118" text-anchor="middle" font-family="Segoe UI Semibold, Segoe UI, sans-serif" font-size="14" fill="#8fb3a0" letter-spacing="0.12em">HOLO EDGE NODE</text>
+</svg>
