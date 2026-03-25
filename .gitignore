@@ -1,14 +1,16 @@
+# BroNode build outputs
+dist/
+build/
+*.spec.bak
+__pycache__/
+*.py[cod]
+packaging/_stage/
+packaging/wix/build/
+
+# Local data / editor noise
 holo-data/
 test-data/
 holo-data-test/
 .roo/
 .gemini/
-docker/happ_config_file
-docker/log-collector/
 AGENTS.md
-log_fix.md
-UNYT_TEST_ANALYSIS.md
-UNYT_TEST_RESULTS*.*
-unyt_test_r*.*
-holos/tmp
-holos/rust/holos-config/target

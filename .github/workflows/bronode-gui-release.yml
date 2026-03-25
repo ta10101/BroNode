@@ -17,9 +17,6 @@ concurrency:
 jobs:
   build-windows:
     runs-on: windows-latest
-    defaults:
-      run:
-        working-directory: windows-gui
     steps:
       - uses: actions/checkout@v4
 
@@ -38,13 +35,10 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: bronode-windows-exe
-          path: windows-gui/dist/BroNode.exe
+          path: dist/BroNode.exe
 
   build-linux:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: windows-gui
     steps:
       - uses: actions/checkout@v4
 
@@ -66,13 +60,10 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: bronode-linux-tarball
-          path: windows-gui/dist/bro-node-linux-x64-*.tar.gz
+          path: dist/bro-node-linux-x64-*.tar.gz
 
   build-macos:
     runs-on: macos-latest
-    defaults:
-      run:
-        working-directory: windows-gui
     steps:
       - uses: actions/checkout@v4
 
@@ -93,7 +84,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: bronode-macos-zip
-          path: windows-gui/dist/bro-node-macos-*.zip
+          path: dist/bro-node-macos-*.zip
 
   release:
     needs: [build-windows, build-linux, build-macos]
@@ -118,7 +109,7 @@ jobs:
           path: release-assets
 
       - name: Copy install doc into release bundle
-        run: cp windows-gui/docs/INSTALL_AND_UNINSTALL.md release-assets/
+        run: cp docs/INSTALL_AND_UNINSTALL.md release-assets/
 
       - name: Verify release assets (fail before empty publish)
         shell: bash
@@ -136,14 +127,13 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          name: BroNode GUI ${{ github.ref_name }}
+          name: BroNode ${{ github.ref_name }}
           draft: false
           prerelease: false
-          # BroNode shares this repo with HolOS / other releases; do not steal the repo "Latest" badge.
-          make_latest: "false"
+          make_latest: "true"
           fail_on_unmatched_files: true
           body: |
-            BroNode — desktop helper for the [Holo Edge Node](https://github.com/Holo-Host/edgenode) (`ghcr.io/holo-host/edgenode`).
+            **BroNode** — desktop app for running the Holo **Edge Node** Docker image (`ghcr.io/holo-host/edgenode`).
 
             **Requires Docker** (Desktop or Engine). See `INSTALL_AND_UNINSTALL.md` in the assets below.
 
