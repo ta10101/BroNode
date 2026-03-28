@@ -6,7 +6,7 @@ Cross-platform desktop dashboard for operating a Holo **Edge Node** container lo
 
 **This repo is only the BroNode app.** Container / ISO sources are upstream: [docs/UPSTREAM_EDGE_NODE.md](docs/UPSTREAM_EDGE_NODE.md).
 
-**Downloads:** [Releases — ta10101/BroNode](https://github.com/ta10101/BroNode/releases) → pick the latest **`bronode/v…`** build for `.exe`, Linux `.tar.gz`, or macOS `.zip`.
+**Downloads:** On GitHub, open this repository’s **Releases** page and download the latest **`bronode/v…`** build for `.exe`, Linux `.tar.gz`, or macOS `.zip`.
 
 **Publishing:** push tag `bronode/v*` (see [RELEASING.md](RELEASING.md)); CI publishes a GitHub Release with binaries attached.
 

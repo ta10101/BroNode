@@ -3,6 +3,7 @@ import importlib.util
 import json
 import os
 import re
+import shutil
 import socket
 import subprocess
 import sys
@@ -102,21 +103,68 @@ APP_CATALOG = [
 ]
 
 
+def _windows_docker_cli_exe():
+    """Use docker.exe next to a .cmd/.bat shim so Windows does not spawn a visible cmd.exe host."""
+    p = shutil.which("docker")
+    if not p:
+        return None
+    low = p.lower()
+    if low.endswith(".exe") and os.path.isfile(p):
+        return p
+    if low.endswith((".cmd", ".bat")):
+        d = os.path.dirname(p)
+        exe = os.path.join(d, "docker.exe")
+        if os.path.isfile(exe):
+            return exe
+    stem, ext = os.path.splitext(p)
+    if ext.lower() not in (".exe", ".cmd", ".bat"):
+        exe = stem + ".exe"
+        if os.path.isfile(exe):
+            return exe
+    return p
+
+
+def _normalize_subprocess_argv(command):
+    """Windows: rewrite docker launcher to real docker.exe when possible (avoids console flashes)."""
+    cmd = list(command)
+    if sys.platform != "win32" or len(cmd) < 1:
+        return cmd
+    base = os.path.basename(cmd[0]).lower()
+    if base in ("docker", "docker.cmd", "docker.bat"):
+        resolved = _windows_docker_cli_exe()
+        if resolved:
+            cmd[0] = resolved
+    return cmd
+
+
 def _subprocess_no_console_kwargs():
-    """Windows: hide console for child processes so the frozen GUI does not flash cmd windows."""
+    """Windows: hide console for child processes so the GUI does not flash cmd/conhost windows."""
     if sys.platform != "win32":
         return {}
+    kwargs = {}
     flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
-    return {"creationflags": flags} if flags else {}
+    if flags:
+        kwargs["creationflags"] = flags
+    # CREATE_NO_WINDOW alone is sometimes not enough for shims; STARTUPINFO hides the initial window.
+    try:
+        si = subprocess.STARTUPINFO()
+        si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        si.wShowWindow = subprocess.SW_HIDE
+        kwargs["startupinfo"] = si
+    except (AttributeError, OSError):
+        pass
+    return kwargs
 
 
 def run_command(command, timeout=20):
+    command = _normalize_subprocess_argv(command)
     try:
         result = subprocess.run(
             command,
             capture_output=True,
             text=True,
             shell=False,
+            stdin=subprocess.DEVNULL,
             timeout=timeout,
             check=False,
             **_subprocess_no_console_kwargs(),
@@ -516,13 +564,13 @@ class EdgeNodeGui:
         except OSError:
             pass
 
-    def _debug_log(self, hypothesis_id, location, message, data=None, run_id=None):
+    def _debug_log(self, kind, location, message, data=None, run_id=None):
         if not self._debug_log_path:
             return
         payload = {
             "sessionId": "bronode",
             "runId": run_id or self._debug_run_id,
-            "hypothesisId": hypothesis_id,
+            "kind": kind,
             "location": location,
             "message": message,
             "data": data or {},
@@ -535,14 +583,12 @@ class EdgeNodeGui:
             pass
 
     def _tk_callback_exception(self, exc, val, tb):
-        # #region agent log
         self._debug_log(
-            "H1",
+            "error",
             "app.py:_tk_callback_exception",
             "Unhandled Tk callback exception",
             {"exc_type": getattr(exc, "__name__", str(exc)), "error": str(val)},
         )
-        # #endregion
         import traceback
 
         traceback.print_exception(exc, val, tb)
@@ -788,14 +834,6 @@ class EdgeNodeGui:
             self.nav_row_frames[name] = (btn, None, None)
 
     def show_tab(self, name):
-        # #region agent log
-        self._debug_log(
-            "H2",
-            "app.py:show_tab",
-            "Tab switch requested",
-            {"tab_name": name, "known": bool(name in self.tab_frames)},
-        )
-        # #endregion
         if name not in self.tab_frames:
             return
         self.current_tab_name = name
@@ -1657,14 +1695,6 @@ class EdgeNodeGui:
         self.root.destroy()
 
     def _show_dialog(self, kind, title, text, buttons=("OK",)):
-        # #region agent log
-        self._debug_log(
-            "H1",
-            "app.py:_show_dialog",
-            "Dialog opened",
-            {"kind": kind, "title": str(title), "button_count": len(buttons)},
-        )
-        # #endregion
         dlg = tk.Toplevel(self.root)
         dlg.withdraw()
         dlg.title(title)
@@ -1936,26 +1966,10 @@ class EdgeNodeGui:
         on_success=None,
         quiet=False,
     ):
-        # #region agent log
-        self._debug_log(
-            "H3",
-            "app.py:_run_in_background:start",
-            "Background command started",
-            {"title": title, "cmd": cmd, "refresh_after": refresh_after},
-        )
-        # #endregion
         self.action_status_var.set(f"{title} running...")
 
         def worker():
             code, out, err = run_command(cmd, timeout=timeout)
-            # #region agent log
-            self._debug_log(
-                "H3",
-                "app.py:_run_in_background:done",
-                "Background command finished",
-                {"title": title, "code": code, "out_len": len(out or ""), "err_len": len(err or "")},
-            )
-            # #endregion
 
             def done():
                 if code == 0:
@@ -2271,9 +2285,6 @@ class EdgeNodeGui:
             self.catalog_tree.insert("", tk.END, values=(item["label"], hostable, url))
 
     def _on_catalog_tree_selected(self, _event=None):
-        # #region agent log
-        self._debug_log("H5", "app.py:_on_catalog_tree_selected", "Catalog tree selection event")
-        # #endregion
         if self._catalog_syncing:
             return
         if not self.catalog_tree:
@@ -2384,26 +2395,10 @@ class EdgeNodeGui:
 
     def _exec_in_container(self, args, title, on_success=None):
         cmd = docker_exec_base() + args
-        # #region agent log
-        self._debug_log(
-            "H4",
-            "app.py:_exec_in_container:start",
-            "Container command started",
-            {"title": title, "args": args},
-        )
-        # #endregion
         self.action_status_var.set(f"{title} running...")
 
         def worker():
             code, out, err = run_command(cmd, timeout=None)
-            # #region agent log
-            self._debug_log(
-                "H4",
-                "app.py:_exec_in_container:done",
-                "Container command finished",
-                {"title": title, "code": code, "out_len": len(out or ""), "err_len": len(err or "")},
-            )
-            # #endregion
 
             def done():
                 self.action_status_var.set("Idle")
@@ -2863,10 +2858,14 @@ class EdgeNodeGui:
             x += 58
 
         core_ok = status.get("python") and status.get("docker")
-        app_ready = core_ok and (status.get("cairosvg") or _is_frozen())
+        # From source, cairosvg is optional (same as frozen builds) so Docker alone unlocks the UI.
+        app_ready = core_ok
         if app_ready:
-            if _is_frozen() and not status.get("cairosvg"):
-                self.dep_status_var.set("Ready (mascot optional in packaged build)")
+            if not status.get("cairosvg"):
+                if _is_frozen():
+                    self.dep_status_var.set("Ready (mascot optional in packaged build)")
+                else:
+                    self.dep_status_var.set("Ready (pip install cairosvg for header mascot)")
             else:
                 self.dep_status_var.set("All dependencies ready")
             self.dep_action_var.set("Ready")
@@ -2888,10 +2887,8 @@ class EdgeNodeGui:
         status = self._check_dependencies()
         self._draw_dependency_status(status)
 
-        # Frozen one-file builds may omit cairosvg/Cairo; do not block on mascot.
-        self.dependencies_ready = status.get("python") and status.get("docker") and (
-            status.get("cairosvg") or _is_frozen()
-        )
+        # Do not block on mascot: frozen builds may omit cairosvg; from source it is optional too.
+        self.dependencies_ready = status.get("python") and status.get("docker")
         if self.dependencies_ready:
             if not self.bootstrap_complete:
                 self.ensure_image_ready_then_continue()
@@ -2946,11 +2943,13 @@ class EdgeNodeGui:
 
         def worker():
             try:
+                pull_cmd = _normalize_subprocess_argv(["docker", "pull", image])
                 proc = subprocess.Popen(
-                    ["docker", "pull", image],
+                    pull_cmd,
                     stdout=subprocess.PIPE,
                     stderr=subprocess.STDOUT,
                     text=True,
+                    stdin=subprocess.DEVNULL,
                     **_subprocess_no_console_kwargs(),
                 )
                 last_line = "Downloading layers..."
@@ -3020,6 +3019,7 @@ class EdgeNodeGui:
                     "-Command",
                     "Start-Process 'Docker Desktop'",
                 ],
+                stdin=subprocess.DEVNULL,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
                 **_subprocess_no_console_kwargs(),

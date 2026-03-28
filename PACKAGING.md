@@ -93,7 +93,7 @@ README links to this doc from the top and from a short **Uninstall & Docker clea
 | **Release workflow** | [`.github/workflows/bronode-gui-release.yml`](../.github/workflows/bronode-gui-release.yml) |
 | **How to tag & publish** | [RELEASING.md](RELEASING.md) |
 
-**Tags:** push `bronode/v*` (e.g. `bronode/v1.0.0`) to trigger builds for Windows `.exe`, Linux `.tar.gz`, macOS `.zip` and create a **public GitHub Release** with those assets plus `INSTALL_AND_UNINSTALL.md` on **[ta10101/BroNode/releases](https://github.com/ta10101/BroNode/releases)**.
+**Tags:** push `bronode/v*` (e.g. `bronode/v1.0.0`) to trigger builds for Windows `.exe`, Linux `.tar.gz`, macOS `.zip` and create a **public GitHub Release** for this repository with those assets plus `INSTALL_AND_UNINSTALL.md`.
 
 **MSI** is built locally (`.\build.ps1 -Msi`), not in CI — attach to the release by hand if you ship it.
 

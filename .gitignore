@@ -8,6 +8,7 @@ packaging/_stage/
 packaging/wix/build/
 
 # Local data / editor noise
+.agents/
 holo-data/
 test-data/
 holo-data-test/

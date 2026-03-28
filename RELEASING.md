@@ -4,7 +4,7 @@ GitHub Actions builds **Windows**, **Linux**, and **macOS** artifacts when you p
 
 ## Where downloads appear
 
-This repository (**[ta10101/BroNode](https://github.com/ta10101/BroNode)**) is **only the BroNode desktop app**. Pushing a tag here creates releases at **[github.com/ta10101/BroNode/releases](https://github.com/ta10101/BroNode/releases)**.
+This repository is **only the BroNode desktop app**. Pushing a tag here triggers CI and creates a **GitHub Release** for this repo (see **Releases** on GitHub).
 
 The **Edge Node Docker image** and full Holo stack live upstream at **[Holo-Host/edgenode](https://github.com/Holo-Host/edgenode)** — not in this repo.
 
