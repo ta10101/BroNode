@@ -8,7 +8,7 @@
       Id="*"
       Name="BroNode"
       Language="1033"
-      Version="1.0.2.0"
+      Version="1.0.3.0"
       Manufacturer="BroNode"
       UpgradeCode="E7F3F4B2-1A89-4C3F-9D2E-8B1C4A5E6F70">
     <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
